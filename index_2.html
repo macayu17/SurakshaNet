@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurakshaNet - Smart Tourist Safety Command Center (Guwahati)</title>
+    <link rel="stylesheet" href="style_1.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="header-title">
+                    <i class="fas fa-shield-alt"></i> SurakshaNet Command Center - Guwahati
+                </h1>
+                <div class="status-indicator">
+                    <span class="status-dot active live-pulse"></span>
+                    <span>Live System Active</span>
+                    <span class="live-counter" id="liveCounter">● LIVE</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="geofence-status">
+                    <div class="geofence-indicator">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>GeoFencing Active</span>
+                        <span class="geofence-dot active"></span>
+                    </div>
+                </div>
+                <div class="language-selector">
+                    <select id="languageSelect" class="form-control">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="as">অসমীয়া</option>
+                    </select>
+                </div>
+                <div class="emergency-button">
+                    <button id="emergencyAlert" class="btn emergency-btn">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        EMERGENCY ALERT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            Live Dashboard
+        </button>
+        <button class="nav-tab" data-tab="map">
+            <i class="fas fa-map-marked-alt"></i>
+            Live Map & GeoFencing
+        </button>
+        <button class="nav-tab" data-tab="tourists">
+            <i class="fas fa-users"></i>
+            Tourist Management
+        </button>
+        <button class="nav-tab" data-tab="alerts">
+            <i class="fas fa-bell"></i>
+            Live Alerts & Anomalies
+        </button>
+        <button class="nav-tab" data-tab="emergency">
+            <i class="fas fa-ambulance"></i>
+            Emergency Response Units
+        </button>
+        <button class="nav-tab" data-tab="e-fir">
+            <i class="fas fa-file-alt"></i>
+            E-FIR Management
+        </button>
+        <button class="nav-tab" data-tab="disaster">
+            <i class="fas fa-radiation"></i>
+            Disaster Alerts
+        </button>
+        <button class="nav-tab" data-tab="reports">
+            <i class="fas fa-chart-bar"></i>
+            Analytics & Reports
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Statistics Cards -->
+                <div class="stats-row">
+                    <div class="stat-card safe live-update">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="safeTourists">45</h3>
+                            <p>Safe Tourists</p>
+                            <span class="live-indicator">● LIVE</span>
+                        </div>
+                    </div>
+                    <div class="stat-card warning live-update">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="alertTourists">8</h3>
+                            <p>Active Alerts</p>
+                            <span class="live-indicator">● LIVE</span>
+                        </div>
+                    </div>
+                    <div class="stat-card critical live-update">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="criticalTourists">2</h3>
+                            <p>Critical Cases</p>
+                            <span class="live-indicator">● LIVE</span>
+                        </div>
+                    </div>
+                    <div class="stat-card info live-update">
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeZones">4</h3>
+                            <p>Active GeoFences</p>
+                            <span class="live-indicator">● LIVE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Overview Map -->
+                <div class="overview-map-container">
+                    <h3>Live Tourist Distribution & GeoFencing - Guwahati</h3>
+                    <div class="map-live-controls">
+                        <div class="live-status">
+                            <span class="live-dot"></span>
+                            <span>Real-time Updates Every 2s</span>
+                        </div>
+                        <div class="unit-status">
+                            <span class="unit-indicator police">
+                                <i class="fas fa-shield-alt"></i>
+                                <span id="policeCount">4</span> Police Units
+                            </span>
+                            <span class="unit-indicator rescue">
+                                <i class="fas fa-plus-circle"></i>
+                                <span id="rescueCount">5</span> Rescue Units
+                            </span>
+                        </div>
+                    </div>
+                    <div id="overviewMap" class="overview-map"></div>
+                </div>
+
+                <!-- Live Anomaly Detection -->
+                <div class="anomaly-detection">
+                    <h3>
+                        <i class="fas fa-brain"></i>
+                        Live AI Anomaly Detection
+                    </h3>
+                    <div id="anomalyFeed" class="anomaly-feed">
+                        <div class="anomaly-item">
+                            <div class="anomaly-content">
+                                <strong>Tourist Movement Analysis:</strong> Unusual pattern detected near Dipor Bil wetlands
+                            </div>
+                            <span class="anomaly-confidence">87%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Alerts -->
+                <div class="recent-alerts">
+                    <h3>Live Alert Feed - Guwahati</h3>
+                    <div id="recentAlertsList" class="alerts-list">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Emergency Protocols Quick Access -->
+                <div class="protocols-quick">
+                    <h3>SurakshaNet Emergency Protocols</h3>
+                    <div class="protocol-buttons">
+                        <button class="btn protocol-btn" data-protocol="panic">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Panic Button Response
+                        </button>
+                        <button class="btn protocol-btn" data-protocol="missing">
+                            <i class="fas fa-search"></i>
+                            Missing Person Protocol
+                        </button>
+                        <button class="btn protocol-btn" data-protocol="medical">
+                            <i class="fas fa-heartbeat"></i>
+                            Medical Emergency
+                        </button>
+                        <button class="btn protocol-btn" data-protocol="geofence">
+                            <i class="fas fa-map-marked-alt"></i>
+                            GeoFence Violation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Map Tab -->
+        <div id="map" class="tab-content">
+            <div class="map-controls">
+                <div class="map-filters">
+                    <button class="btn--sm filter-btn active" data-filter="all">All Tourists</button>
+                    <button class="btn--sm filter-btn safe" data-filter="safe">Safe</button>
+                    <button class="btn--sm filter-btn warning" data-filter="alert">Alerts</button>
+                    <button class="btn--sm filter-btn critical" data-filter="critical">Critical</button>
+                    <button class="btn--sm filter-btn police" data-filter="police">Police Units</button>
+                    <button class="btn--sm filter-btn rescue" data-filter="rescue">Rescue Units</button>
+                </div>
+                <div class="geofence-controls">
+                    <button class="btn--sm geofence-btn active" data-geofence="all">All GeoFences</button>
+                    <button class="btn--sm geofence-btn safe" data-geofence="safe">Safe Zones</button>
+                    <button class="btn--sm geofence-btn caution" data-geofence="caution">Caution Zones</button>
+                    <button class="btn--sm geofence-btn restricted" data-geofence="restricted">Restricted Zones</button>
+                </div>
+                <div class="map-tools">
+                    <button class="btn--sm" id="refreshMap">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn--sm" id="fullscreenMap">
+                        <i class="fas fa-expand"></i>
+                        Fullscreen
+                    </button>
+                    <button class="btn--sm" id="toggleLiveMovement">
+                        <i class="fas fa-play"></i>
+                        Live Movement: ON
+                    </button>
+                </div>
+            </div>
+            <div id="mainMap" class="main-map"></div>
+            <div class="map-legend">
+                <h4>Live Map Legend - Enhanced Vehicles</h4>
+                <div class="legend-items">
+                    <div class="legend-section">
+                        <h5>Police Units</h5>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🚔</span>
+                            <span>Patrol Cars</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🏍️</span>
+                            <span>Motorcycles</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🚨</span>
+                            <span>Rapid Response</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🐕‍🦺</span>
+                            <span>K9 Units</span>
+                        </div>
+                    </div>
+                    <div class="legend-section">
+                        <h5>Medical/Rescue Units</h5>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🚑</span>
+                            <span>Ambulances</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🚒</span>
+                            <span>Fire Trucks</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">⛑️</span>
+                            <span>Rescue Teams</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="font-size: 16px;">🚁</span>
+                            <span>Air Ambulance</span>
+                        </div>
+                    </div>
+                    <div class="legend-section">
+                        <h5>Tourist Status</h5>
+                        <div class="legend-item">
+                            <span class="legend-marker safe"></span>
+                            <span>Safe Tourist</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker warning"></span>
+                            <span>Alert Status</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker critical"></span>
+                            <span>Critical/Emergency</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tourist Management Tab -->
+        <div id="tourists" class="tab-content">
+            <div class="tourist-management">
+                <div class="search-section">
+                    <div class="search-controls">
+                        <input type="text" id="touristSearch" class="form-control" placeholder="Search by ID, Name, or Digital ID...">
+                        <button class="btn--primary" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+                        <button class="btn--secondary" id="scanQR">
+                            <i class="fas fa-qrcode"></i>
+                            Scan Digital ID
+                        </button>
+                    </div>
+                    <div class="live-checkin-feed">
+                        <h4>Live Check-ins - Guwahati</h4>
+                        <div id="liveCheckinFeed" class="checkin-feed">
+                            <!-- Live check-in notifications -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tourists-table-container">
+                    <table class="tourists-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Nationality</th>
+                                <th>Safety Score</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>E-FIR</th>
+                                <th>Communication</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="touristsTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts & Anomalies Tab -->
+        <div id="alerts" class="tab-content">
+            <div class="alerts-management">
+                <div class="alerts-header">
+                    <h2>Live Anomaly Detection & Alerts - Guwahati</h2>
+                    <div class="ai-status">
+                        <i class="fas fa-brain"></i>
+                        <span>AI Detection: Active</span>
+                        <span class="ai-confidence" id="aiConfidence">95% Confidence</span>
+                    </div>
+                </div>
+                <div class="alerts-filters">
+                    <button class="btn--sm filter-btn active" data-severity="all">All Alerts</button>
+                    <button class="btn--sm filter-btn critical" data-severity="high">Critical</button>
+                    <button class="btn--sm filter-btn warning" data-severity="medium">Medium</button>
+                    <button class="btn--sm filter-btn info" data-severity="low">Low</button>
+                    <button class="btn--sm filter-btn geofence" data-severity="geofence">GeoFence Violations</button>
+                </div>
+                
+                <div class="alerts-grid">
+                    <div id="alertsList" class="alerts-container">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Response Units Tab -->
+        <div id="emergency" class="tab-content">
+            <div class="emergency-center">
+                <div class="emergency-header">
+                    <h2>SurakshaNet Emergency Response Center - Guwahati</h2>
+                    <div class="emergency-status">
+                        <span class="status-indicator">
+                            <span class="status-dot active"></span>
+                            Ready for Response
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="emergency-grid">
+                    <div class="active-emergencies">
+                        <h3>Active Emergencies</h3>
+                        <div id="activeEmergencies" class="emergency-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                    
+                    <div class="response-units">
+                        <h3>Enhanced Emergency Response Units</h3>
+                        <div class="units-grid">
+                            <div class="unit-category">
+                                <h4>Police Units 🚔🏍️🚨🐕‍🦺</h4>
+                                <div id="policeUnits" class="unit-list">
+                                    <!-- Dynamic police units -->
+                                </div>
+                            </div>
+                            <div class="unit-category">
+                                <h4>Medical/Rescue Units 🚑🚒⛑️🚁</h4>
+                                <div id="rescueUnits" class="unit-list">
+                                    <!-- Dynamic rescue units -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="response-protocols">
+                        <h3>Response Protocols</h3>
+                        <div id="protocolSteps" class="protocol-steps">
+                            <p>Select an emergency type to view response protocol</p>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="btn emergency-action" data-action="dispatch">
+                                <i class="fas fa-car"></i>
+                                Dispatch Unit
+                            </button>
+                            <button class="btn emergency-action" data-action="efir">
+                                <i class="fas fa-file-alt"></i>
+                                Generate E-FIR
+                            </button>
+                            <button class="btn emergency-action" data-action="contact">
+                                <i class="fas fa-phone"></i>
+                                Contact Emergency Services
+                            </button>
+                            <button class="btn emergency-action" data-action="broadcast">
+                                <i class="fas fa-broadcast-tower"></i>
+                                Emergency Broadcast
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- E-FIR Management Tab -->
+        <div id="e-fir" class="tab-content">
+            <div class="efir-section">
+                <div class="efir-header">
+                    <h2>
+                        <i class="fas fa-file-alt"></i> E-FIR Management System
+                    </h2>
+                    <div class="efir-filters">
+                        <input type="text" id="efirSearch" class="form-control" placeholder="Search by FIR ID, Tourist ID, Incident Type...">
+                        <select id="efirStatusFilter" class="form-control">
+                            <option value="all">All Status</option>
+                            <option value="filed">Filed</option>
+                            <option value="under_review">Under Review</option>
+                            <option value="investigation">Investigation</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                        <button class="btn--sm btn--primary" id="efirSearchBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </div>
+                <div id="efirTableContainer" class="efir-table-container">
+                    <!-- E-FIR list populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Disaster Alerts Tab -->
+        <div id="disaster" class="tab-content">
+            <div class="disaster-alert-section">
+                <div class="disaster-header">
+                    <h2><i class="fas fa-radiation"></i> Disaster Alerts & Emergency Broadcasts</h2>
+                    <button class="btn--primary" id="createAlertBtn">
+                        <i class="fas fa-plus"></i> Create Disaster Alert
+                    </button>
+                </div>
+                <div id="activeDisasterAlerts" class="disaster-alerts-list">
+                    <!-- Active disaster alerts go here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics & Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="reports-section">
+                <div class="reports-controls">
+                    <select class="form-control" id="reportType">
+                        <option value="daily">Daily Report - Guwahati</option>
+                        <option value="weekly">Weekly Summary - Northeast</option>
+                        <option value="monthly">Monthly Analysis - Assam</option>
+                        <option value="geofence">GeoFence Analytics</option>
+                    </select>
+                    <button class="btn--primary" id="generateReport">
+                        <i class="fas fa-file-download"></i>
+                        Generate SurakshaNet Report
+                    </button>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <h3>Tourist Safety Trends - Guwahati</h3>
+                        <canvas id="safetyChart" style="position: relative; height: 300px;"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Alert Distribution</h3>
+                        <canvas id="alertChart" style="position: relative; height: 300px;"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>GeoFence Violations</h3>
+                        <canvas id="geofenceChart" style="position: relative; height: 300px;"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Enhanced Unit Deployment</h3>
+                        <canvas id="unitsChart" style="position: relative; height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="touristModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tourist Details - SurakshaNet Guwahati</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="touristDetails">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <div id="protocolModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>SurakshaNet Emergency Protocol</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="protocolDetails">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <div id="efirDetailModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>E-FIR Details - Guwahati Police</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="efirDetailBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <div id="createAlertModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Disaster Alert - Northeast Region</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="disasterAlertForm">
+                    <div class="form-group">
+                        <label class="form-label">Alert Type</label>
+                        <select class="form-control" id="alertTypeSelect">
+                            <option value="flood">🌊 Flood</option>
+                            <option value="earthquake">🏚️ Earthquake</option>
+                            <option value="landslide">⛰️ Landslide</option>
+                            <option value="cyclone">🌀 Cyclone</option>
+                            <option value="forest_fire">🔥 Forest Fire</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Severity</label>
+                        <select class="form-control" id="alertSeveritySelect">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Affected Area (Guwahati Region)</label>
+                        <select class="form-control" id="alertAreaSelect">
+                            <option value="Kamakhya Temple">Kamakhya Temple Area</option>
+                            <option value="Brahmaputra River">Brahmaputra River Zone</option>
+                            <option value="Pobitora Wildlife">Pobitora Wildlife Sanctuary</option>
+                            <option value="Dipor Bil">Dipor Bil Wetlands</option>
+                            <option value="Fancy Bazaar">Fancy Bazaar District</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alert Message</label>
+                        <textarea class="form-control" id="alertMessageInput" placeholder="Enter emergency alert message for tourists..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Broadcast Language</label>
+                        <select class="form-control" id="alertLangSelect">
+                            <option value="en">English</option>
+                            <option value="bn">Bengali (বাংলা)</option>
+                            <option value="as">Assamese (অসমীয়া)</option>
+                            <option value="hi">Hindi (हिंदी)</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn--primary" id="submitAlertBtn">
+                        <i class="fas fa-broadcast-tower"></i> Broadcast Alert
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications and Popups -->
+    <div id="notifications" class="notifications-container">
+        <!-- Notifications -->
+    </div>
+
+    <div id="checkinPopup" class="checkin-popup hidden">
+        <div class="checkin-content">
+            <h4>New Tourist Check-in - Guwahati</h4>
+            <div id="checkinDetails"></div>
+            <button class="btn--sm" onclick="closeCheckinPopup()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app_3.js"></script>
+</body>
+</html>
